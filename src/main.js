@@ -21,9 +21,21 @@ export default class SlackHistoryExport {
     )
   }
   processGroups (outputStream) {
-    return this.fetchGroupDetails(this.args.group).then(
-      groupObj => this.fetchGroupHistory(outputStream, groupObj.id)
-    )
+    console.log(this.args.group);
+    if (this.args.group === '<ALL>') {
+      let self = this;
+      return this.slack.groups().then(function(groups) {
+        let p = Promise.resolve();
+        _.each(groups.groups, function (groupObj) {
+          p = p.then(() => self.fetchGroupHistory(outputStream, groupObj.id));
+        })
+      })
+    }
+    else {
+      return this.fetchGroupDetails(this.args.group).then(
+        groupObj => this.fetchGroupHistory(outputStream, groupObj.id)
+      )
+    }
   }
   processChannels (outputStream) {
     return this.fetchChannelDetails(this.args.channel).then(
