@@ -14,18 +14,43 @@ export default class SlackHistoryExport {
     this.slack = new SlackApi(this.args.token)
   }
   processIMs (outputStream) {
+    if (this.args.username === '<ALL>') {
+      return this.slack.users().then(function(users) {
+        console.log(_.map(users.members, function (userObj) {
+          return userObj.name
+        }).join("\n"))
+      })
+    }
+    else {
     return this.fetchUserDetail(this.args.username).then(
       userObj => this.fetchIMInfo(userObj).then(
         imInfo => this.fetchIMHistory(outputStream, imInfo.id),
       ),
     )
   }
+  }
   processGroups (outputStream) {
+    if (this.args.group === '<ALL>') {
+      return this.slack.groups().then(function(groups) {
+        console.log(_.map(groups.groups, function (groupObj) {
+          return groupObj.name
+        }).join("\n"))
+      })
+    }
+    else {
     return this.fetchGroupDetails(this.args.group).then(
       groupObj => this.fetchGroupHistory(outputStream, groupObj.id),
     )
   }
+  }
   processChannels (outputStream) {
+    if (this.args.channel === '<ALL>') {
+      return this.slack.channels().then(function(channels) {
+        console.log(_.map(channels.channels, function (channelObj) {
+          return channelObj.name
+        }).join("\n"))
+      })
+    }
     return this.fetchChannelDetails(this.args.channel).then(
       channelObj => this.fetchChannelHistory(outputStream, channelObj.id),
     )
